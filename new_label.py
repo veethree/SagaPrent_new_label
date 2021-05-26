@@ -41,11 +41,14 @@ def extract_id(text):
 # Looks up a vessel id on the web
 def get_vessel_data(vessel_id):
 	if vessel_id.isnumeric():
-		page = requests.get("https://www.samgongustofa.is/siglingar/skrar-og-utgafa/skipaskra/uppfletting?sq=" + str(vessel_id))
+		page = requests.get(f"https://www.samgongustofa.is/siglingar/skrar-og-utgafa/skipaskra/uppfletting?sq={vessel_id}")
 		soup = BeautifulSoup(page.content, "html.parser")
 		try:
 			name = soup.find("strong", text="Nafn:").parent.find("span").string
-			suffix = soup.find("strong", text="Umdæmisstafir:").parent.find("span").contents[0].strip()
+			raw_suffix = soup.find("strong", text="Umdæmisstafir:").parent.find("span").contents[0].strip().split("-")
+
+			#Removes leading 0's from the suffix number
+			suffix = f"{raw_suffix[0]}-{raw_suffix[1].lstrip('0')}"
 			return [name, suffix]
 		except:
 			return False
@@ -101,7 +104,7 @@ def select_boat_id():
 		print("'" + str(boat_id) + "' er ógilt skipaskrárnúmer!")
 		select_boat_id()
 
-# 
+# Prompts the user to confirm the name acquired from the internet
 def confirm_name():
 	global boat_name, possible_name
 	print(possible_name)
